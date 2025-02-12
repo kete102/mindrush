@@ -2,7 +2,7 @@ import { DrizzlePostgreSQLAdapter } from "@lucia-auth/adapter-drizzle"
 import { drizzle } from "drizzle-orm/postgres-js"
 import postgres from "postgres"
 import { z } from "zod"
-import { sessionTable, userTable } from "./db/schemas/auth"
+import { sessionTable, userTable } from "./models/auth.model"
 
 // Valida mediante zod que en nuestro .env siempre tengamos los valores
 // que necesitamos

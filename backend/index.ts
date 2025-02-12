@@ -4,7 +4,7 @@ import { cors } from "hono/cors"
 import { HTTPException } from "hono/http-exception"
 import type { Context } from "./context"
 import { lucia } from "./lucia"
-import { authRouter } from "./routes/auth"
+import { authRouter } from "./routes/auth.routes"
 
 const app = new Hono<Context>()
 
