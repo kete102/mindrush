@@ -1,0 +1,23 @@
+{
+  "name": "mindrush",
+  "scripts": {
+    "dev": "bun run --hot backend/index.ts",
+    "format:write": "prettier . --write",
+    "format:check": "prettier . --check"
+  },
+  "dependencies": {
+    "hono": "^4.6.20"
+  },
+  "devDependencies": {
+    "@eslint/compat": "1.2.6",
+    "@eslint/js": "^9.20.0",
+    "@ianvs/prettier-plugin-sort-imports": "4.4.1",
+    "@types/bun": "latest",
+    "eslint": "^9.20.1",
+    "eslint-config-prettier": "10.0.1",
+    "eslint-plugin-drizzle": "0.2.3",
+    "globals": "^15.15.0",
+    "prettier": "3.5.0",
+    "typescript-eslint": "^8.24.0"
+  }
+}
