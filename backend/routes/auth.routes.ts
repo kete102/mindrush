@@ -1,5 +1,9 @@
 import { db } from "@/adapter"
 import type { Context } from "@/context"
+import {
+	achievementsTable,
+	userAchievementsTable,
+} from "@/db/schemas/achievements"
 import { userTable } from "@/db/schemas/auth"
 import { hintsTable, userHintsTable } from "@/db/schemas/hints"
 import { statsTable } from "@/db/schemas/stats"
@@ -31,6 +35,19 @@ export const authRouter = new Hono<Context>()
 
 				await trx.insert(statsTable).values({
 					userId: userId,
+				})
+
+				const defaultAchievements = await trx
+					.select({ achievementId: achievementsTable.id })
+					.from(achievementsTable)
+
+				await trx.insert(userAchievementsTable).values({
+					userId: userId,
+					achievements: defaultAchievements.map(({ achievementId }) => ({
+						achievementId,
+						progress: 0,
+						completed: false,
+					})),
 				})
 
 				const defaultHints = await trx

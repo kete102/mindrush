@@ -4,6 +4,7 @@ import { cors } from "hono/cors"
 import { HTTPException } from "hono/http-exception"
 import type { Context } from "./context"
 import { lucia } from "./lucia"
+import { achievementsRouter } from "./routes/ahievements.routes"
 import { authRouter } from "./routes/auth.routes"
 import { hintsRouter } from "./routes/hints.routes"
 import { statsRouter } from "./routes/stats.routes"
@@ -40,6 +41,7 @@ const routes = app
 	.route("/auth", authRouter)
 	.route("/stats", statsRouter)
 	.route("/hints", hintsRouter)
+	.route("/achievements", achievementsRouter)
 
 app.onError((err, c) => {
 	if (err instanceof HTTPException) {
