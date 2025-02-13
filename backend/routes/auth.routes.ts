@@ -1,6 +1,7 @@
 import { db } from "@/adapter"
 import type { Context } from "@/context"
 import { userTable } from "@/db/schemas/auth"
+import { hintsTable, userHintsTable } from "@/db/schemas/hints"
 import { statsTable } from "@/db/schemas/stats"
 import { lucia } from "@/lucia"
 import { loggedIn } from "@/middleware/loggedIn"
@@ -30,12 +31,18 @@ export const authRouter = new Hono<Context>()
 
 				await trx.insert(statsTable).values({
 					userId: userId,
-					bestStreak: 0,
-					streak: 0,
-					wins: 0,
-					winRatio: 0,
-					gamesPlayed: 0,
-					totalPoints: 0,
+				})
+
+				const defaultHints = await trx
+					.select({ hintId: hintsTable.id })
+					.from(hintsTable)
+
+				await trx.insert(userHintsTable).values({
+					userId: userId,
+					hints: defaultHints.map(({ hintId }) => ({
+						hintId,
+						quantity: 0,
+					})),
 				})
 			})
 

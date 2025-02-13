@@ -1,11 +1,17 @@
+const TOTAL_QUESTIONS = 10
+/**
+ * @description Function to calculate the total earned coins in a game.
+ *
+ * Each correct answer is equal to 1 coin.
+ *
+ * If the users correctly answers all the questions a bonus of 5 coins is earned.
+ *
+ * @param Number {correctAnswers}  Total correct answers of the gameT
+ */
 export function calculateCoins(correctAnswers: number): number {
-	if (correctAnswers === 10) {
-		return 10 // 10 respuestas correctas = 10 coins
-	} else if (correctAnswers === 9) {
-		return 3 // 9 respuestas correctas = 3 coins
-	} else if (correctAnswers === 8) {
-		return 1 // 8 respuestas correctas = 1 coin
-	} else {
-		return 0 // Menos de 8 respuestas correctas = 0 coins
-	}
+	let earnedCoins = correctAnswers
+
+	if (correctAnswers === TOTAL_QUESTIONS) earnedCoins += 5
+
+	return earnedCoins
 }
