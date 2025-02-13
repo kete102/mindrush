@@ -1,8 +1,9 @@
 import { db } from "@/adapter"
 import type { Context } from "@/context"
+import { userTable } from "@/db/schemas/auth"
+import { statsTable } from "@/db/schemas/stats"
 import { lucia } from "@/lucia"
 import { loggedIn } from "@/middleware/loggedIn"
-import { userTable } from "@/models/auth.model"
 import { loginSchema, type SuccessResponse } from "@/shared/types"
 import { zValidator } from "@hono/zod-validator"
 import { eq } from "drizzle-orm"
@@ -19,18 +20,30 @@ export const authRouter = new Hono<Context>()
 		const userId = generateId(15)
 
 		try {
-			//1. Insert the user in the userTable
-			await db.insert(userTable).values({
-				id: userId,
-				username,
-				passwor_hash: passHash,
+			await db.transaction(async (trx) => {
+				//Insert the user in the userTable
+				await trx.insert(userTable).values({
+					id: userId,
+					username,
+					password_hash: passHash,
+				})
+
+				await trx.insert(statsTable).values({
+					userId: userId,
+					bestStreak: 0,
+					streak: 0,
+					wins: 0,
+					winRatio: 0,
+					gamesPlayed: 0,
+					totalPoints: 0,
+				})
 			})
 
-			//2. Create a session and a cookieSession for the new user
+			//Create a session and a cookieSession for the new user
 			const session = await lucia.createSession(userId, { username })
 			const sessionCookie = lucia.createSessionCookie(session.id).serialize()
 
-			//3. Attach the sessionCookie to the header of the response
+			//Attach the sessionCookie to the header of the response
 			c.header("Set-Cookie", sessionCookie, { append: true })
 
 			return c.json<SuccessResponse>(
@@ -69,7 +82,7 @@ export const authRouter = new Hono<Context>()
 		//Checks the given password  with the passwor from the userTable
 		const validPassword = await Bun.password.verify(
 			password,
-			existingUser.passwor_hash
+			existingUser.password_hash
 		)
 
 		if (!validPassword) {
@@ -116,4 +129,22 @@ export const authRouter = new Hono<Context>()
 			message: "User fetched",
 			data: { username: user.username },
 		})
+	})
+	.delete("/delete", loggedIn, async (c) => {
+		const session = c.get("session")!
+
+		const [deletedUser] = await db
+			.delete(userTable)
+			.where(eq(userTable.id, session.userId))
+			.returning()
+
+		if (!deletedUser) {
+			throw new HTTPException(404, { message: "User not found" })
+		}
+
+		await lucia.invalidateSession(session.id)
+
+		c.header("Set-Cookie", lucia.createBlankSessionCookie().serialize())
+
+		return c.redirect("/")
 	})
