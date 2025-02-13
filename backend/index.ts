@@ -5,6 +5,7 @@ import { HTTPException } from "hono/http-exception"
 import type { Context } from "./context"
 import { lucia } from "./lucia"
 import { authRouter } from "./routes/auth.routes"
+import { statsRouter } from "./routes/stats.routes"
 
 const app = new Hono<Context>()
 
@@ -33,7 +34,10 @@ app.use("*", cors(), async (c, next) => {
 	return next()
 })
 
-const routes = app.basePath("/api").route("/auth", authRouter)
+const routes = app
+	.basePath("/api")
+	.route("/auth", authRouter)
+	.route("/stats", statsRouter)
 
 app.onError((err, c) => {
 	if (err instanceof HTTPException) {
