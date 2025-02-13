@@ -1,4 +1,4 @@
-import { sql, type InferSelectModel } from "drizzle-orm"
+import { type InferSelectModel } from "drizzle-orm"
 import { integer, jsonb, pgTable, text } from "drizzle-orm/pg-core"
 import { z } from "zod"
 import { userTable } from "./auth"
