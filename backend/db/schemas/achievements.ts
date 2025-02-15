@@ -36,7 +36,7 @@ export type UserAchievements = Omit<
 	}[]
 }
 
-export const useAchievementSchema = z.object({
+export const updateAchievementSchema = z.object({
 	achievementId: z.enum(
 		[
 			"first_game_win",

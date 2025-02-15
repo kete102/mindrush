@@ -6,14 +6,13 @@ import {
 } from "@/db/schemas/achievements"
 import { loggedIn } from "@/middleware/loggedIn"
 import type { SuccessResponse } from "@/shared/types"
+import { zValidator } from "@hono/zod-validator"
 import { eq } from "drizzle-orm"
 import { Hono } from "hono"
 import { HTTPException } from "hono/http-exception"
 
-export const achievementsRouter = new Hono<Context>().get(
-	"/",
-	loggedIn,
-	async (c) => {
+export const achievementsRouter = new Hono<Context>()
+	.get("/", loggedIn, async (c) => {
 		const user = c.get("user")!
 
 		const userAchievements = await db
@@ -60,5 +59,10 @@ export const achievementsRouter = new Hono<Context>().get(
 			message: "User achievements",
 			data: results,
 		})
-	}
-)
+	})
+	.put(
+		"/update-achievements",
+		loggedIn,
+		zValidator("json", updateAchievementsSchema),
+		async (c) => {}
+	)
