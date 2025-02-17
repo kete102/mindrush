@@ -1,6 +1,5 @@
 import type { InferSelectModel } from "drizzle-orm"
 import { integer, jsonb, pgTable, text } from "drizzle-orm/pg-core"
-import { z } from "zod"
 import { userTable } from "./auth"
 
 export const achievementsTable = pgTable("achievements", {
@@ -36,34 +35,28 @@ export type UserAchievements = Omit<
 	}[]
 }
 
-export const updateAchievementSchema = z.object({
-	achievementId: z.enum(
-		[
-			"first_game_win",
-			"perfect_game_1",
-			"perfect_game_5",
-			"perfect_game_10",
-			"fast_completion_1",
-			"fast_completion_5",
-			"fast_completion_10",
-			"solo_victory_1",
-			"solo_victory_5",
-			"solo_victory_10",
-			"undefeated_1",
-			"undefeated_5",
-			"undefeated_10",
-			"legendary_1",
-			"legendary_5",
-			"legendary_10",
-			"grandmaster_1",
-			"grandmaster_5",
-			"grandmaster_10",
-			"immortal_1",
-			"immortal_5",
-			"immortal_10",
-		],
-		{ message: "Invalid achievementId" }
-	),
-})
-
-export type GetUserAchievements = {}
+// Objetivo de cada achievement
+export const achievementsGoals: Record<string, number> = {
+	first_game_win: 1,
+	perfect_game_1: 1,
+	perfect_game_5: 5,
+	perfect_game_10: 10,
+	fast_completion_1: 1,
+	fast_completion_5: 5,
+	fast_completion_10: 10,
+	solo_victory_1: 1,
+	solo_victory_5: 5,
+	solo_victory_10: 10,
+	undefeated_1: 1,
+	undefeated_5: 5,
+	undefeated_10: 10,
+	legendary_1: 1,
+	legendary_5: 5,
+	legendary_10: 10,
+	grandmaster_1: 1,
+	grandmaster_5: 5,
+	grandmaster_10: 10,
+	immortal_1: 1,
+	immortal_5: 5,
+	immortal_10: 10,
+}

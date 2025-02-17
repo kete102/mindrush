@@ -6,13 +6,14 @@ import {
 } from "@/db/schemas/achievements"
 import { loggedIn } from "@/middleware/loggedIn"
 import type { SuccessResponse } from "@/shared/types"
-import { zValidator } from "@hono/zod-validator"
 import { eq } from "drizzle-orm"
 import { Hono } from "hono"
 import { HTTPException } from "hono/http-exception"
 
-export const achievementsRouter = new Hono<Context>()
-	.get("/", loggedIn, async (c) => {
+export const achievementsRouter = new Hono<Context>().get(
+	"/",
+	loggedIn,
+	async (c) => {
 		const user = c.get("user")!
 
 		const userAchievements = await db
@@ -23,8 +24,11 @@ export const achievementsRouter = new Hono<Context>()
 			.from(userAchievementsTable)
 			.where(eq(userAchievementsTable.userId, user.id))
 
-		if (!userAchievements)
-			throw new HTTPException(404, { message: "User achievements not found" })
+		if (!userAchievements) {
+			throw new HTTPException(404, { message: "Achievements not found" })
+		}
+
+		console.log({ userAchievements })
 
 		const results = await Promise.all(
 			userAchievements.map(async (userAch) => {
@@ -38,7 +42,6 @@ export const achievementsRouter = new Hono<Context>()
 							})
 							.from(achievementsTable)
 							.where(eq(achievementsTable.id, ach.achievementId))
-
 						return {
 							achievementId: ach.achievementId,
 							progress: ach.progress,
@@ -49,7 +52,6 @@ export const achievementsRouter = new Hono<Context>()
 						}
 					})
 				)
-
 				return achievementsWithProgress
 			})
 		)
@@ -59,10 +61,5 @@ export const achievementsRouter = new Hono<Context>()
 			message: "User achievements",
 			data: results,
 		})
-	})
-	.put(
-		"/update-achievements",
-		loggedIn,
-		zValidator("json", updateAchievementsSchema),
-		async (c) => {}
-	)
+	}
+)

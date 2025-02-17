@@ -1,5 +1,7 @@
 import { db } from "@/adapter"
 import type { Context } from "@/context"
+import { updateUserAchievements } from "@/controllers/achievements"
+import { GetStats } from "@/controllers/stats"
 import {
 	statsTable,
 	updateStatsSchema,
@@ -14,44 +16,14 @@ import { Hono } from "hono"
 import { HTTPException } from "hono/http-exception"
 
 export const statsRouter = new Hono<Context>()
-	.get("/", loggedIn, async (c) => {
-		const user = c.get("user")!
-
-		const [existingStats] = await db
-			.select()
-			.from(statsTable)
-			.where(eq(statsTable.userId, user.id))
-			.limit(1)
-
-		if (!existingStats) {
-			return c.json<UserStats>({
-				bestStreak: 0,
-				gamesPlayed: 0,
-				streak: 0,
-				totalPoints: 0,
-				winRatio: 0,
-				coins: 0,
-				wins: 0,
-			})
-		}
-
-		return c.json<UserStats>({
-			bestStreak: existingStats.bestStreak,
-			gamesPlayed: existingStats.gamesPlayed,
-			streak: existingStats.streak,
-			totalPoints: existingStats.totalPoints,
-			winRatio: existingStats.winRatio,
-			wins: existingStats.wins,
-			coins: existingStats.coins,
-		})
-	})
-	.post(
+	.get("/", loggedIn, GetStats)
+	.put(
 		"/update",
 		loggedIn,
 		zValidator("json", updateStatsSchema),
 		async (c) => {
 			const user = c.get("user")!
-			const { correctAnswers } = c.req.valid("json")
+			const { correctAnswers, gameDuration } = c.req.valid("json")
 
 			// Comenzamos una transacción para hacer ambas cosas en una sola consulta
 			const result = await db.transaction(async (trx) => {
@@ -95,6 +67,16 @@ export const statsRouter = new Hono<Context>()
 					.update(statsTable)
 					.set(updatedStats)
 					.where(eq(statsTable.userId, user.id))
+
+				const updatedUserAchievements = await updateUserAchievements(
+					trx,
+					user.id,
+					correctAnswers,
+					gameDuration,
+					isGameWon
+				)
+
+				console.log({ updatedUserAchievements })
 
 				return { updatedStats } // Devolvemos las estadísticas actualizadas para la respuesta
 			})

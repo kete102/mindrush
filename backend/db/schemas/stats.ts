@@ -21,4 +21,5 @@ export type UserStats = Omit<InferSelectModel<typeof statsTable>, "userId">
 
 export const updateStatsSchema = z.object({
 	correctAnswers: z.number(),
+	gameDuration: z.number(),
 })
